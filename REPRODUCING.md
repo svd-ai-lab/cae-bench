@@ -32,7 +32,7 @@ rather than a stale pull three weeks later.
 
 ```bash
 uv tool install harbor
-git clone https://github.com/svd-ai-lab/hwe-bench && cd hwe-bench
+git clone https://github.com/svd-ai-lab/cae-bench && cd cae-bench
 
 # If the GHCR package is still private, authenticate once:
 # echo $GITHUB_TOKEN | docker login ghcr.io -u <username> --password-stdin
@@ -68,13 +68,14 @@ move together.
 ```bash
 export OPENAI_API_KEY=sk-...        # any OpenAI-compatible endpoint
 
-harbor run -c configs/<run-config>.yaml
+harbor run -p cases/cfd/fluids/lid_driven_cavity_ghia_re100 \
+    -a terminus-2 -m <model-id>
 ```
 
-Run configs live flat under `configs/`; each documents its own endpoint and
-key rotation at the top of the YAML. Aggregate the resulting job directories
-with `python tools/aggregate_leaderboard.py <dirs>` — the accounting rules
-that make two runs comparable are in [`LEADERBOARD.md`](LEADERBOARD.md).
+`terminus-2` is the scaffold the published board runs on, so a row produced any
+other way is a diagnostic rather than a board cell. Aggregate the resulting job
+directories with `python tools/aggregate_leaderboard.py <dirs>` — the accounting
+rules that make two runs comparable are in [`LEADERBOARD.md`](LEADERBOARD.md).
 
 ## Regional mirrors / registry overrides
 

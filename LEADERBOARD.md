@@ -11,6 +11,12 @@ Where results actually live:
   `tools/bench_store.py`. Everything a review needs per trial: `reward.json`,
   `reward_detail.json`, both containers' logs, figures, indexed by
   `(run, case, label)`. Browse it with the review page (`results-local/review.html`).
+- **The published board** — [cae-bench.svdailab.com](https://cae-bench.svdailab.com),
+  the numbers as they stand. Each publication is an immutable snapshot under
+  `results-local/board/`, written by `tools/publish_board.py` and rendered into
+  the page by `tools/render_public_board.py`; `tools/refresh_public_board.sh`
+  runs the whole chain and verifies the deploy. A snapshot is what makes a
+  quoted figure re-checkable — the page moves, the snapshot behind it does not.
 - **Releases** — if a result set is worth preserving, attach it to a Release.
   Not to the source tree.
 
@@ -57,7 +63,7 @@ rather than assumed:
 
 | clause | why it is that way |
 |---|---|
-| **one task per physics family** | within-family correlation on this store is ≈ 0, so 50 operating points of one reaction carry the resolution of a handful. `tools/frozen_set.py` selects the representatives — the one with existing model coverage, then the cheapest, since inside a family the choice is statistically free. Counting directories overstates the board. |
+| **one task per physics family** | within-family correlation on this store is ≈ 0, so 50 operating points of one reaction carry the resolution of a handful. The representatives are named in [`tools/board_population.txt`](tools/board_population.txt) — composed once from the union of the oracle evidence, then **read, never re-derived**: a population recomputed per host has twice produced a wrong board (see that file's header). Counting directories overstates the board. |
 | **per-track mean, then equal weight** | weighting by task count would let whichever physics we generated most variants of set the headline: holding every per-track mean fixed while two tracks grew from 20→50 and 11→50 moves a pooled mean by **+0.10 to +0.16** with no change in any model. Equal weight is the composition-invariant choice, and it is why the frozen set may stay uneven. |
 | **at one trial each** | repeats buy ranking power, not headline precision, and the gap that matters here (0.25–0.33) is already well above the MDE at r=1. Derivation and the N×r table: [`docs/scoreboard_sizing.zh.md`](docs/scoreboard_sizing.zh.md), re-derivable with `python tools/power_analysis.py`. |
 
@@ -71,7 +77,9 @@ Two rules about what may be *said* about a row:
   never go on the same axis; that is what versioning the set is for.
 
 ```bash
-python tools/frozen_set.py                                       # the set, and what it costs
+cat  tools/board_population.txt                                  # THE SET the board scores
+bash tools/board_sweep.sh -m <model> --dry-run                   # the exact sweep each column ran
+python tools/frozen_set.py                                       # eligibility + cost, NOT the board's set
 python tools/frozen_set.py --min-models 4                        # the comparable subset
 python tools/plot_scoreboard.py --unified --runs ... --models ... # the row + its interval
 python tools/aggregate_leaderboard.py jobs/<name>/<timestamp>/   # --details for per-case breakdown

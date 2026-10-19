@@ -1,4 +1,4 @@
-# HWE-bench trial architecture & generality
+# CAE-bench trial architecture & generality
 
 How a single trial actually executes — and which parts of this design
 extend to simulation domains beyond the ones we currently ship (see
@@ -11,7 +11,8 @@ point at went with the self-built runner.
 ## Trial pipeline (left → right time)
 
 Harbor owns this. `tools/run_harbor_trial.sh` picks a dataset, an agent
-(`claude-code` / `codex` / `oracle` / `nop`) and a credential set; Harbor builds
+(`terminus-2` — the board's scaffold — / `claude-code` / `codex` / `oracle` /
+`nop`) and a credential set; Harbor builds
 the environment from `task.toml`'s `docker_image`, runs the agent in it, then
 starts a **second** container for the verifier when the case declares
 `environment_mode = "separate"`, and collects the paths named in `artifacts`.
@@ -63,7 +64,7 @@ Currently: `result.json = {kpi: {value: <number>, source: <how to re-extract>}}`
 
 | Domain | Fits? | Notes |
 |---|---|---|
-| Circuit / SPICE measurements (gain, f₃dB, settling time) | ✅ | Native fit — log files have scalar measures |
+| Combustion / battery KPIs (ignition delay, flame speed, terminal voltage) | ✅ | Native fit — the solver's own output carries scalar measures |
 | CFD numerical KPIs (Cd, Cl, residual, max y+) | ✅ | Native fit |
 | FEA stress / displacement at named locations | ✅ | Same shape — extract from solver's text output |
 | EM frequency-response, S-parameters | ✅ | Scalar at chosen frequency |
@@ -80,8 +81,8 @@ verifier re-runs extract with file as stdin, asserts match.
 
 | Source kind | Generalises to | Notes |
 |---|---|---|
-| `file_extract` (text file + UNIX pipeline) | Any text-format solver output | Most solvers; covers CFD logs, SPICE logs, structured text dumps |
-| `ltspice_log` (LTspice native .log query) | LTspice variants (UTF-16 logs) | Solver-specific path; same pattern (custom parser per format) extends to e.g. CSV-only outputs, HDF5 outputs |
+| `file_extract` (text file + UNIX pipeline) | Any text-format solver output | Most solvers; covers CFD logs, FEA text output, structured text dumps |
+| `ltspice_log` (LTspice native .log query) | Archived circuit cases only, outside CAE-bench (UTF-16 logs) | Solver-specific path; same pattern (custom parser per format) extends to e.g. CSV-only outputs, HDF5 outputs |
 | `sim_run_*` (sim-cli's own record) | Anything that runs through sim-cli | Optional — most agents bypass |
 | **Binary-format outputs (HDF5, VTK, ROS bag)** | Need adapter | New `source.kind` per format — e.g. `h5_extract` with HDF5 path query, `rosbag_query` with topic + time |
 | **Image outputs** | Don't fit re-extraction model | Need similarity-metric verifier; outside this architecture |
@@ -93,7 +94,7 @@ verifier scores once at the end.
 
 | Workflow shape | Fits? | Notes |
 |---|---|---|
-| Batch CFD / SPICE / FEA (run once, score once) | ✅ | Native fit |
+| Batch CFD / FEA / kinetics (run once, score once) | ✅ | Native fit |
 | Multi-step CAE (mesh → solve → post-process → judge) | ✅ | Multiple solver calls within one agent loop; verifier still scores once at end |
 | **Interactive GUI (Fluent meshing workflow, COMSOL Desktop attach)** | ⚠️ | Agent does many small actions; verifier still scores final state. PreToolUse hooks could add per-step validation if needed. |
 | **Closed-loop control (robot follows commanded trajectory)** | ⚠️ | KPI is final-state scalar (e.g. position error at t=T), so contract works; but the SIMULATION environment is more complex (need physics step + sensor feedback loop). Requires real-time sim platform inside the container. |
@@ -117,11 +118,16 @@ checkpointing + multiple foreground calls, or `run_in_background=true`.
 #### A5. Agent framework is whatever Harbor can drive
 
 This assumption **was** "the agent framework is claude-code", and it is no longer
-true: the board carries a `codex` row beside the `claude-code` ones, and the two
-differ in ways that reach the measurement. The live example is the turn budget —
-`claude_code` exposes `max_turns`, `codex` exposes no such flag, so a 60-turn cap
-applied to one and not the other inflated the codex row's lead until every capped
-trial was re-run without it.
+true. Frameworks differ in ways that reach the measurement: the live example is
+the turn budget — `claude_code` exposes `max_turns`, `codex` exposes no such
+flag, so a 60-turn cap applied to one and not the other inflated the codex row's
+lead until every capped trial was re-run without it.
+
+#620 settles it the other way round for the published board: **the board runs on
+`terminus-2` and no other scaffold**, and `claude-code` was dropped. A row from
+any other scaffold is a diagnostic or a control, and it may not be pooled into a
+board aggregate — the scaffold is part of what the number measures, so two of
+them under one mean is two measurements pretending to be one.
 
 So the assumption that survives is weaker and worth stating plainly: **a task
 must be answerable by any agent Harbor can drive, and any budget we impose must
@@ -170,7 +176,7 @@ Use it when:
 - Output is a finite set of scalar KPIs extractable deterministically from solver artifacts
 - Per-trial wall ≤ ~30 min (with checkpointing) or bounded enough for `run_in_background` polling
 - Verification is rule-based, not human-judgment-based
-- Solver runs in Linux (Docker) or via wine (LTspice / commercial via wrapper)
+- Solver runs in Linux (Docker) or via wine (commercial via wrapper)
 
 Don't force it when:
 - The "right answer" requires human aesthetic judgment (shape, layout, design)
