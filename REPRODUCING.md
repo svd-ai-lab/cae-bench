@@ -50,7 +50,7 @@ harbor run -p cases/<domain>/<subdomain>/<case-id> \
 docker pull docker.1panel.live/opencfd/openfoam-default:2412
 docker tag  docker.1panel.live/opencfd/openfoam-default:2412 opencfd/openfoam-default:2412
 
-harbor run -p cases/cfd/fluids/lid_driven_cavity_ghia_re100 --agent oracle
+harbor run -p cases/cfd/fluids/taylor_green_vortex_2d_re100 --agent oracle
 ```
 
 Path A and Path B produce equivalent runs because every layer input is
@@ -68,7 +68,7 @@ move together.
 ```bash
 export OPENAI_API_KEY=sk-...        # any OpenAI-compatible endpoint
 
-harbor run -p cases/cfd/fluids/lid_driven_cavity_ghia_re100 \
+harbor run -p cases/cfd/fluids/taylor_green_vortex_2d_re100 \
     -a terminus-2 -m <model-id>
 ```
 

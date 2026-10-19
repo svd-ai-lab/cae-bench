@@ -4,7 +4,7 @@
 
 [dataset]
 name = "hwe-bench/hwe-bench"
-description = "CAE-bench evaluates LLM agents on computer-aided engineering: the agent drives a real solver and is scored on whether the number it reports lands inside a defensible tolerance band, by a deterministic verifier rather than an LLM judge. The current release covers CFD, combustion, battery and 2.5D electronics-packaging thermal and warpage."
+description = "CAE-bench is SWE-bench for engineering simulation. It measures whether a model can do computer-aided engineering — FEA, CFD, multibody dynamics, durability and optimization — in real CAE software, scored by a deterministic verifier rather than an LLM judge. Tasks come from real engineering practice, not synthesized from papers. The current release covers CFD, combustion, battery and electronics-packaging thermal tasks."
 keywords = [ "CAE", "combustion", "battery", "CFD", "packaging", "OpenFOAM", "Cantera", "PyBaMM", "CalculiX",]
 [[dataset.authors]]
 name = "SVD AI Lab"
