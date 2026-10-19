@@ -1,6 +1,6 @@
 # Domain images
 
-HWE-bench-CAE uses one image for each public track.
+CAE-bench uses one image for each public track.
 
 | image | primary software | tasks |
 |---|---|---|

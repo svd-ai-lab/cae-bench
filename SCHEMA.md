@@ -1,8 +1,8 @@
-# SCHEMA — HWE-bench public v0
+# SCHEMA — CAE-bench public v0
 
 This file describes the case contract for the public industrial simulation
-agent benchmark. It is intentionally solver-neutral: OpenFOAM, LTspice, and
-future solver domains use the same Harbor task shape, result contract, and KPI
+agent benchmark. It is intentionally solver-neutral: OpenFOAM, Cantera, PyBaMM,
+CalculiX and future solver domains use the same Harbor task shape, result contract, and KPI
 grader.
 
 ## 1. Case Layout
@@ -289,12 +289,12 @@ The agent must write `/tmp/agent/result.json`. The canonical shape is:
 
 ```json
 {
-  "gain_hf": {
-    "value": -0.000011,
+  "pressure_drop": {
+    "value": 42.0,
     "source": {
       "kind": "file_extract",
       "path": "/root/case/out.log",
-      "extract": "python3 /root/case/extract_gain.py /root/case/out.log"
+      "extract": "python3 /root/case/extract_dp.py /root/case/out.log"
     }
   }
 }
@@ -306,10 +306,8 @@ Supported source kinds:
 
 - `file_extract`: rerun an extraction command against a file produced by the
   agent or solver.
-- `ltspice_log`: parse a native LTspice `.log` file for completion status,
-  scalar `.meas` output, stepped `Measurement:` tables, or stepped parameter
-  values. This is the preferred LTspice provenance source because it is
-  launcher-neutral.
+- `ltspice_log`: parse a native LTspice `.log` file. The verifier still
+  accepts it for archived circuit cases; no CAE-bench case uses it.
 - `sim_run_stdout`: extract from a recorded sim-cli run stdout.
 - `sim_run_kpi`: extract from structured parsed output recorded by sim-cli.
 
@@ -317,7 +315,7 @@ Bare numeric answers are not enough. If the solver fails, the agent may still
 report failure-oriented KPIs, but each value must point to a verifiable log or
 artifact source.
 
-Do not hand-write, edit, or fabricate solver logs, `.meas` output, `.raw` data,
+Do not hand-write, edit, or fabricate solver logs, result or field files,
 or run-history records to satisfy provenance. The claimed source must be an
 artifact produced by the actual run or by deterministic post-processing of that
 run.
@@ -416,7 +414,7 @@ agent solved the task, but it must not be required for score eligibility.
 
 ## 7. Public Case Classification
 
-All OpenFOAM and LTspice cases may be public, but they must be classified so
+Any case may be public, but it must be classified so
 readers can separate runnable leaderboard tasks from draft task definitions and
 high-leakage classics.
 
@@ -499,9 +497,9 @@ drafts, instead of silently hiding unfinished tasks.
 Useful local checks:
 
 ```bash
-python tools/lint_case.py cases/eda-analog/circuits/rc_highpass_ac
+python tools/lint_case.py cases/cfd/fluids/lid_driven_cavity_ghia_re100
 python -m pytest lib/sim_benchmark_verifier/tests
-harbor run -p cases/eda-analog/circuits --agent oracle -i rc_highpass_ac
+harbor run -p cases/cfd/fluids --agent oracle -i lid_driven_cavity_ghia_re100
 ```
 
 On Windows with Docker Desktop, set:

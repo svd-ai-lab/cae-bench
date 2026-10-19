@@ -3,7 +3,7 @@
 `install_harness.sh` installs the components shared by the battery, combustion
 and CFD task images:
 
-- the HWE-bench verifier package;
+- the CAE-bench verifier package;
 - Node.js and the agent CLIs Harbor may invoke;
 - the token-usage proxy helpers used by supported agent configurations; and
 - a non-root `agent` user.

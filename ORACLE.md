@@ -28,7 +28,10 @@ python tools/run_oracle_all.py                       # sweep a domain / the cata
 
 `results-local/` is gitignored on purpose: results are data produced by a
 particular machine at a particular commit, not source. If a result set is
-worth keeping, attach it to a Release.
+worth keeping, attach it to a Release. The numbers on the published board
+(`cae-bench.svdailab.com`) are kept a third way — as immutable snapshots
+written by `tools/publish_board.py`, so a figure quoted off the page can be
+checked against the snapshot it came from.
 
 ## What the number has to satisfy
 
