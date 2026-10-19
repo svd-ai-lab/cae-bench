@@ -44,7 +44,7 @@ Detectors emit two annotations onto each per-KPI entry — both are
 | Axis | Values | Detector(s) |
 |---|---|---|
 | `provenance_stage` | P0_hallucination · P1_path_invalid · P2_extract_unrunnable · P3_extract_mismatch · P4_pass · spec_error | universal (single, solver-agnostic) |
-| `solver_stage` | L0_input_syntax · L2_solver_crash · L3_convergence · L4_conservation · L5_physics · L5_quantitative · L6_pass · (open enum) | universal (L2/L5/L6 from KPI fields) + openfoam (L3/L4 from log scan) + ltspice (L2/L3 from log scan) + future per-solver |
+| `solver_stage` | L0_input_syntax · L2_solver_crash · L3_convergence · L4_conservation · L5_physics · L5_quantitative · L6_pass · (open enum) | universal (L2/L5/L6 from KPI fields) + openfoam (L3/L4 from log scan) + future per-solver |
 
 Two-axis split solves a v3.1 confusion: provenance failures
 ("paperwork") and solver failures ("physics") need different fixes.
@@ -70,7 +70,7 @@ Currently: `result.json = {kpi: {value: <number>, source: <how to re-extract>}}`
 | EM frequency-response, S-parameters | ✅ | Scalar at chosen frequency |
 | Robotics: collision count, path length, settling time | ✅ | Scalar from rosbag / sim log |
 | **Field outputs (CFD vorticity field, FEA stress contour)** | ⚠️ | Single scalar reduction (max, integral, line-probe) fits; full field comparison needs different verifier |
-| **Image outputs (camera frame from robotic sim, CAD render)** | ❌ | No scalar; would need perceptual similarity metric or LLM judge |
+| **Image outputs (camera frame from robotic sim, rendered view)** | ❌ | No scalar; would need perceptual similarity metric or LLM judge |
 | **Time-series / trajectory (joint angles over time)** | ⚠️ | Reduce to scalar features (overshoot, settling time, RMS); the contract works, the case author has more upfront work |
 | **Stochastic outputs (Monte Carlo, RL training reward)** | ⚠️ | Single trial returns a sample, and the tolerance band is binary — it accommodates **no** fuzz, so a sampling spread comparable to `pass_tol` scores at random. The fix is a KPI defined on the distribution (a quantile, a fixed-seed statistic), never a wider band: a band widened until both a right and a wrong answer pass has stopped measuring anything |
 
@@ -82,7 +82,6 @@ verifier re-runs extract with file as stdin, asserts match.
 | Source kind | Generalises to | Notes |
 |---|---|---|
 | `file_extract` (text file + UNIX pipeline) | Any text-format solver output | Most solvers; covers CFD logs, FEA text output, structured text dumps |
-| `ltspice_log` (LTspice native .log query) | Archived circuit cases only, outside CAE-bench (UTF-16 logs) | Solver-specific path; same pattern (custom parser per format) extends to e.g. CSV-only outputs, HDF5 outputs |
 | `sim_run_*` (sim-cli's own record) | Anything that runs through sim-cli | Optional — most agents bypass |
 | **Binary-format outputs (HDF5, VTK, ROS bag)** | Need adapter | New `source.kind` per format — e.g. `h5_extract` with HDF5 path query, `rosbag_query` with topic + time |
 | **Image outputs** | Don't fit re-extraction model | Need similarity-metric verifier; outside this architecture |
@@ -159,7 +158,6 @@ Concrete examples of where the current scheme falls short:
 
 | Domain | What breaks | Required extension |
 |---|---|---|
-| **Generative design (CAD shape from prompt)** | No scalar KPI for "is this shape good" | New verifier paradigm: design rules + manufacturability scoring + LLM-judge-with-rubric. Outside scope of this benchmark. |
 | **Computer vision in robotics sim** | Image-output → no re-extractable scalar | New source kind: `image_metric` with reference image + similarity threshold. Verifier needs CV library. |
 | **Autonomous driving sim** | Long-running real-time + closed-loop + safety-critical | Different runtime (CARLA/SUMO instead of Docker), different harness (real-time sim API vs shell), different verifier (trajectory + collision metrics). Architecturally a fork. |
 | **Quantum circuit simulation** | Outputs are state-vector / density-matrix / shot histogram | New source kind: `quantum_state` with HDF5 / npz reader; KPI extracts measurement-basis probabilities. Numerical contract holds. |

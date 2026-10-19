@@ -2,7 +2,7 @@
 
 # CAE-bench
 
-**For engineers who model and simulate in industrial CAE software.**
+CAE-bench is SWE-bench for engineering simulation. It measures whether a model can do computer-aided engineering — FEA, CFD, multibody dynamics, durability and optimization — in real CAE software. Tasks come from real engineering practice, not synthesized from papers. The current release covers CFD, combustion, battery and electronics-packaging thermal tasks.
 
 > **An industrial simulation agent benchmark.** Hand an LLM agent a real
 > CAE task — meshing, boundary conditions, solver invocation, log parsing,
@@ -55,11 +55,11 @@ unreproducible KPIs score zero. A reported value with **no solver artifact on
 disk** scores zero regardless of what stdout claimed — this is what stops the
 "recall the closed-form answer and skip the solver" shortcut.
 
-**Out of scope, deliberately.** Not a knowledge quiz, not a syntax-of-Fluent
-test, not an LLM-as-judge tournament. It does not require any specific tool —
-`sim-cli`, native solver CLIs, Python wrappers, or the agent's own scratch
-scripts are all valid launch routes. Tooling is implementation, not the thing
-being measured.
+**Any launch route, one measurement.** The score is the computed result,
+checked by code. The agent drives the solver however it likes — `sim-cli`,
+native solver CLIs, Python wrappers or its own scratch scripts are all valid
+launch routes — because tooling is implementation and the engineering result is
+what is measured.
 
 ## Scope
 
@@ -68,8 +68,7 @@ sense [Wikipedia](https://en.wikipedia.org/wiki/Computer-aided_engineering)
 gives it: finite element analysis (FEA), computational fluid dynamics (CFD),
 multibody dynamics (MBD), durability and optimization, done in real CAE
 software. The current release covers **CFD, combustion, battery and 2.5D
-electronics-packaging thermal and warpage** tasks. Circuit simulation (EDA) and
-CAD modelling are outside the benchmark.
+electronics-packaging thermal and warpage** tasks.
 
 Built on [Harbor](https://www.harborframework.com/): each task is a
 Harbor-compatible directory (Dockerfile + instruction + `solve.sh` oracle +

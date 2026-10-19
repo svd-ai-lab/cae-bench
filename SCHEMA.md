@@ -1,9 +1,9 @@
 # SCHEMA — CAE-bench public v0
 
 This file describes the case contract for the public industrial simulation
-agent benchmark. It is intentionally solver-neutral: OpenFOAM, Cantera, PyBaMM,
-CalculiX and future solver domains use the same Harbor task shape, result contract, and KPI
-grader.
+agent benchmark. It is intentionally solver-neutral: OpenFOAM, Cantera,
+PyBaMM, CalculiX and future solver domains use the same Harbor task shape,
+result contract, and KPI grader.
 
 ## 1. Case Layout
 
@@ -306,8 +306,6 @@ Supported source kinds:
 
 - `file_extract`: rerun an extraction command against a file produced by the
   agent or solver.
-- `ltspice_log`: parse a native LTspice `.log` file. The verifier still
-  accepts it for archived circuit cases; no CAE-bench case uses it.
 - `sim_run_stdout`: extract from a recorded sim-cli run stdout.
 - `sim_run_kpi`: extract from structured parsed output recorded by sim-cli.
 
@@ -497,9 +495,9 @@ drafts, instead of silently hiding unfinished tasks.
 Useful local checks:
 
 ```bash
-python tools/lint_case.py cases/cfd/fluids/lid_driven_cavity_ghia_re100
+python tools/lint_case.py cases/cfd/fluids/taylor_green_vortex_2d_re100
 python -m pytest lib/sim_benchmark_verifier/tests
-harbor run -p cases/cfd/fluids --agent oracle -i lid_driven_cavity_ghia_re100
+harbor run -p cases/cfd/fluids --agent oracle -i taylor_green_vortex_2d_re100
 ```
 
 On Windows with Docker Desktop, set:
